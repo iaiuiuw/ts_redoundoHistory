@@ -3,7 +3,6 @@ import IAction from './IAction';
 import SetPropertyAction from './actions/setPropertyAction';
 import CommonAction from './actions/commonAction';
 import IPropUndoable from './IPropUndoable';
-import { object } from 'prop-types';
 import Transaction from './transaction';
 
 export default class RUHelper {

@@ -1,11 +1,8 @@
 import IAction from './IAction';
-import { InvalidOperationException, IEnumerable } from 'linq-to-typescript';
 import Transaction from './transaction';
 import { IActionHistory } from './history/IActionHistory';
 import SimpleHistory from './history/SimpleHistory';
-import { computed, action } from 'mobx';
-import EventCenter from '@/utils/eventCenter';
-import { content } from 'html2canvas/dist/types/css/property-descriptors/content';
+import EventCenter from './eventCenter'
 
 export default class ActionManager {
   private static _defaultinstance: ActionManager;
@@ -66,7 +63,7 @@ export default class ActionManager {
   /// <param name="existingAction">An action to be recorded in the buffer and executed</param>
   public RecordAction(action: IAction): void {
     if (action == null) {
-      throw new InvalidOperationException(
+      throw new Error(
         'ActionManager.RecordAction: the action argument is null',
       );
     }
@@ -98,14 +95,14 @@ export default class ActionManager {
     if (this.CurrentAction != null) {
       var candidateActionName: string =
         candidate != null ? candidate.ActionDesc : '';
-      throw new InvalidOperationException(
+      throw new Error(
         'ActionManager.RecordActionDirectly: the ActionManager is currently running ' +
-          `or undoing an action (${this.CurrentAction.ActionDesc}), and this action (while being executed) attempted ` +
-          `to recursively record another action (${candidateActionName}), which is not allowed. ` +
-          'You can examine the stack trace of this exception to see what the ' +
-          'executing action did wrong and change this action not to influence the ' +
-          'Undo stack during its execution. Checking if ActionManager.ActionIsExecuting == true ' +
-          'before launching another transaction might help to avoid the problem. Thanks and sorry for the inconvenience.',
+        `or undoing an action (${this.CurrentAction.ActionDesc}), and this action (while being executed) attempted ` +
+        `to recursively record another action (${candidateActionName}), which is not allowed. ` +
+        'You can examine the stack trace of this exception to see what the ' +
+        'executing action did wrong and change this action not to influence the ' +
+        'Undo stack during its execution. Checking if ActionManager.ActionIsExecuting == true ' +
+        'before launching another transaction might help to avoid the problem. Thanks and sorry for the inconvenience.',
       );
     }
   }
@@ -150,13 +147,13 @@ export default class ActionManager {
 
   public CommitTransaction(...raiseActions: (() => void)[]) {
     if (this.TransactionStack.length == 0) {
-      throw new InvalidOperationException(
+      throw new Error(
         'ActionManager.CommitTransaction was called' +
-          ' when there is no open transaction (TransactionStack is empty).' +
-          ' Please examine the stack trace of this exception to find code' +
-          ' which called CommitTransaction one time too many.' +
-          " Normally you don't call OpenTransaction and CommitTransaction directly," +
-          ' but use using(var t = Transaction.Create(Root)) instead.',
+        ' when there is no open transaction (TransactionStack is empty).' +
+        ' Please examine the stack trace of this exception to find code' +
+        ' which called CommitTransaction one time too many.' +
+        " Normally you don't call OpenTransaction and CommitTransaction directly," +
+        ' but use using(var t = Transaction.Create(Root)) instead.',
       );
     }
 
@@ -186,18 +183,17 @@ export default class ActionManager {
   //#endregion
 
   //#region Undo, Redo
-  @action
   public Undo(): void {
     if (!this.CanUndo) {
       return;
     }
     if (this.ActionIsExecuting) {
-      throw new InvalidOperationException(
+      throw new Error(
         'ActionManager is currently busy' +
-          ` executing a transaction (${this.CurrentAction?.ActionDesc}). This transaction has called Undo()` +
-          ' which is not allowed until the transaction ends.' +
-          ' Please examine the stack trace of this exception to see' +
-          ' what part of your code called Undo.',
+        ` executing a transaction (${this.CurrentAction?.ActionDesc}). This transaction has called Undo()` +
+        ' which is not allowed until the transaction ends.' +
+        ' Please examine the stack trace of this exception to see' +
+        ' what part of your code called Undo.',
       );
     }
     this.CurrentAction = this.History.CurrentState.PreviousAction;
@@ -205,18 +201,17 @@ export default class ActionManager {
     this.CurrentAction = null;
   }
 
-  @action
   public Redo(): void {
     if (!this.CanRedo) {
       return;
     }
     if (this.ActionIsExecuting) {
-      throw new InvalidOperationException(
+      throw new Error(
         'ActionManager is currently busy' +
-          ` executing a transaction (${this.CurrentAction?.ActionDesc}). This transaction has called Redo()` +
-          ' which is not allowed until the transaction ends.' +
-          ' Please examine the stack trace of this exception to see' +
-          ' what part of your code called Redo.',
+        ` executing a transaction (${this.CurrentAction?.ActionDesc}). This transaction has called Redo()` +
+        ' which is not allowed until the transaction ends.' +
+        ' Please examine the stack trace of this exception to see' +
+        ' what part of your code called Redo.',
       );
     }
     this.CurrentAction = this.History.CurrentState.NextAction;
@@ -224,12 +219,10 @@ export default class ActionManager {
     this.CurrentAction = null;
   }
 
-  @computed
   get CanUndo(): boolean {
     return this.History.CanMoveBack;
   }
 
-  @computed
   get CanRedo(): boolean {
     return this.History.CanMoveForward;
   }
@@ -237,7 +230,6 @@ export default class ActionManager {
   //#endregion
 
   //#region Buffer
-  @action
   Clear() {
     this.History.Clear();
     this.CurrentAction = null;

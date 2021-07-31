@@ -1,8 +1,7 @@
 import { IActionHistory } from './IActionHistory';
 import SimpleHistoryNode from './SimpleHistoryNode';
-import { InvalidOperationException } from 'linq-to-typescript';
 import IAction from '../IAction';
-import EventCenter from '@/utils/eventCenter';
+import EventCenter from '../eventCenter';
 
 export default class SimpleHistory implements IActionHistory {
   constructor() {
@@ -100,10 +99,10 @@ export default class SimpleHistory implements IActionHistory {
 
   public MoveForward() {
     if (!this.CanMoveForward) {
-      throw new InvalidOperationException(
+      throw new Error(
         'History.MoveForward() cannot execute because' +
-          ' CanMoveForward returned false (the current state' +
-          ' is the last state in the undo buffer.',
+        ' CanMoveForward returned false (the current state' +
+        ' is the last state in the undo buffer.',
       );
     }
     if (!this.CurrentState.NextAction.HasExecuted) {
@@ -119,10 +118,10 @@ export default class SimpleHistory implements IActionHistory {
 
   public MoveBack() {
     if (!this.CanMoveBack) {
-      throw new InvalidOperationException(
+      throw new Error(
         'History.MoveBack() cannot execute because' +
-          ' CanMoveBack returned false (the current state' +
-          ' is the last state in the undo buffer.',
+        ' CanMoveBack returned false (the current state' +
+        ' is the last state in the undo buffer.',
       );
     }
     this.CurrentState.PreviousAction.UnExecute();

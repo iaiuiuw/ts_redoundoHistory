@@ -1,6 +1,5 @@
 import IAction from './IAction';
 import ActionManager from './actionManager';
-import { string } from 'prop-types';
 
 export default class Transaction implements IAction {
   constructor(actionManager: ActionManager) {
