@@ -4,7 +4,8 @@ based on the CSharp project UndoFramework.net https://github.com/KirillOsenkov/U
 
 you can find a simple samlpe in example.ts
 
-first insall us          npm install
+first insall use          npm install
+
 then run the example     ts-node .\example.ts
 
 
